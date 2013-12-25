@@ -1,0 +1,19 @@
+<script id="mainPage" type="text/x-jquery-tmpl">
+<table id="colorTable" class="colorTable">
+<caption>
+<div class="colorTitle">Colors</div>
+<div class="colorInstructions">Click on the Color Name to see how many votes for that color.
+<br/>When you do click on Total, the sum of above numbers will show
+</div>
+</caption>
+<tr><th>Color</th><th>Votes</th></tr>
+</table>
+</script>
+
+<script id="gridRow" type="text/x-jquery-tmpl">
+<tr><td>${color}</td><td id="value_${color_id}"></td></tr>
+</script>
+
+<script id="totalRow" type="text/x-jquery-tmpl">
+<tr class="totalRow"><td>Total</td><td id="totalValue"></td></tr>
+</script>
