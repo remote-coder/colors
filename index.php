@@ -3,6 +3,7 @@
  * ColorApp
  */
 
+$appFile = "config/Colors.ini";
 $paths = array( 
 	realpath('.'),
 	realpath('./class'),
@@ -21,7 +22,18 @@ function __autoload ($class) {
 	include_once $class; 
 }
 
+function error_handler($code, $message, $file, $line) {
+	$error = "code: {$code} message: {$message} file: {$file} line: {$line}\r\n";
+	error_log($error);
+	echo "Sorry, we have an Error. Please contact Support at (800)555-1212 \r\n.";
+}
+
+function exception_handler($exception) {
+	error_log(print_r($exception,1));
+	echo "Sorry, we have a problem. Please contact Support at (800)555-1212 \r\n";
+}
+
 //okay now do the app.  we're treating this like a front-end controller
-$colorApp = new ColorApp();
+$colorApp = new ColorApp("Colors");
 $colorApp->start();
 

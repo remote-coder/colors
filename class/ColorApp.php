@@ -3,6 +3,42 @@ class ColorApp
 {
 	/**
 	 * 
+	 * @var PDO
+	 */
+	private $_db = null;
+	
+	/**
+	 * Set up the mini app
+	 * @param string $configFileName
+	 * @param string $section
+	 * @throws Exception
+	 */
+	public function __construct($configFileName, $section = 'test') {
+		//set an error handler and exceptopn handler
+		set_error_handler('error_handler');
+		set_exception_handler('exception_handler');
+		
+		//make sure that config file exists, otherwise you're going nowhere fast
+		if( !file_exists("config/{$configFileName}.ini") ) {
+			throw new Exception("Invalid Config File");
+		}	
+		
+		//now parse the ini
+		$config = parse_ini_file("config/{$configFileName}.ini", true);
+		//if the section you speficied doesn't exist, you got problems dude
+		if(!isset($config[$section])) {
+			throw new Exception("Invalid Config Environment");
+		}
+		
+		//store the successful PDO so you can DI it in anything data related that needs it
+		$this->_db = DataModel::initDBConnection($config[$section]);
+		
+	}
+	
+
+	
+	/**
+	 * This is the front-end controller / router.  It is the traffic cop for your request.
 	 */
 	public function start() {
 		
@@ -71,51 +107,21 @@ class ColorApp
 	 *	pagination		
 	 * 	
 	 * - for 'colors', just pour the whole content down
-	 * - for 'votes', if a 'color' filter is specified, filter on the color and
-	 *   return those rows, if not then return it all
+	 * - for 'votes' - filtered by color
 	 */
 	protected function _gotGetSomeData($request=array()) {
 		$data = array();
 		$qualifiers = array();
-		
 		//Has to be a type we approve of, otherwise you're getting a blank json return
 		if(array_key_exists('type',$request)) {
 			$qualifiers['type']=$request['type'];
 			switch ($request['type']) {
 				case 'colors':
-					$pseudoTable = array(
-						array('color_id'=>10, 'color'=>'Red'),
-						array('color_id'=>20, 'color'=>'Orange'),
-						array('color_id'=>30, 'color'=>'Yellow'),
-						array('color_id'=>40, 'color'=>'Green'),
-						array('color_id'=>50, 'color'=>'Blue'),
-						array('color_id'=>60, 'color'=>'Indigo'),
-						array('color_id'=>75, 'color'=>'Violet'),
-					);
-					
-					$data = $pseudoTable;
+					$data = DataModel::getColorData($this->_db);
 				break;
-				
 				case 'votes':
-					$pseudoTable = array(
-						array('city'=>'Anchorage', 'color'=>'Blue', 'votes'=>10000,),
-						array('city'=>'Anchorage', 'color'=>'Yellow', 'votes'=>15000,),
-						array('city'=>'Brooklyn', 'color'=>'Red', 'votes'=>100000),
-						array('city'=>'Brooklyn', 'color'=>'Blue', 'votes'=>250000),
-						array('city'=>'Detroit', 'color'=>'Red', 'votes'=>160000),
-						array('city'=>'Selma', 'color'=>'Yellow', 'votes'=>15000),
-						array('city'=>'Selma', 'color'=>'Violet', 'votes'=>5000),
-					);
-					
-					if(array_key_exists('color', $request)) {
-						$qualifiers['color']=$request['color'];
-						foreach ($pseudoTable as $row) {
-							if(array_key_exists('color', $row) && $request['color']== $row['color']) {
-								$data[]=$row;
-							}
-						}
-					}
-					
+					$qualifiers['color']=$request['color'];  
+					$data = DataModel::getVoteDataByColor($this->_db, array('color'=>$request['color']));
 				break;
 				default:
 					;
