@@ -178,7 +178,7 @@ ColorApp.content = function()
         	var textValue = "";
         	//for each data row format the data, make it a li and jam it in the ul
         	$.each(data.data, function(index,voteData) {
-        		total += voteData.votes;
+        		total += parseInt( voteData.votes );
         		var votes = ColorApp.utils.numberFormat(voteData.votes);
         		textValue += "<li><span>"+voteData.city+ ":</span><span class='cityTotal'>"+ votes+"</span></li>";
     		}); 
@@ -235,7 +235,7 @@ ColorApp.utils = (function()
 		    $.each(workObject, function(index,colorGroup) {
 		    	if(filterKey=='all' || filterKey ==index){
 		        	$.each(colorGroup, function(index,cityRow) {
-			        	total += cityRow.votes;
+			        	total += parseInt(cityRow.votes);
 		        	});
 		       	}
 		   	});
